@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV עריך עם שמירה מתקדמת - נכסי ריהאוס 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .btn-warning {
+            background: #ff9800;
+        }
+        
+        .btn-warning:hover {
+            background: #f57c00;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .instructions h3 {
+            color: #1976D2;
+            margin-top: 0;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 12px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 8px;
+            text-align: right;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+            background: white;
+        }
+        
+        .editable {
+            background: #f8f9fa !important;
+            border: 2px dashed #dee2e6 !important;
+            min-height: 20px;
+            cursor: text;
+        }
+        
+        .editable:hover {
+            background: #e9ecef !important;
+            border-color: #007bff !important;
+        }
+        
+        .editable:focus {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+            outline: none;
+        }
+        
+        .property-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .price-cell {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .contact-cell {
+            color: #3498db;
+        }
+        
+        .link-cell {
+            font-size: 10px;
+            max-width: 200px;
+            word-break: break-all;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tr:hover {
+            background: #f0f8ff !important;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+            text-align: center;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            table {
+                font-size: 10px;
+            }
+            
+            th, td {
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 CSV עריך עם שמירה מתקדמת - נכסי ריהאוס 2025</h1>
+            <p>מלא פרטים, שמור אוטומטית, יצא HTML/CSV/JSON או העתק לגוגל שיטס</p>
+            <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px; margin: 0 5px;">שמירה אוטומטית ✓</span>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px; margin: 0 5px;">ייצוא מלא ✓</span>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px; margin: 0 5px;">גיבוי ושחזור ✓</span>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🔧 כיצד למלא ולשמור את הטבלה:</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>📝 עריכה:</h4>
+                    <ul>
+                        <li><strong>לחץ על תא ריק</strong> כדי למלא פרטים</li>
+                        <li><strong>השדות הפתוחים</strong> (באפור) מוכנים למילוי</li>
+                        <li><strong>שמירה אוטומטית</strong> כל 30 שניות</li>
+                        <li><strong>Ctrl+S</strong> - שמירה ידנית</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>💾 שמירה וייצוא:</h4>
+                    <ul>
+                        <li><strong>שמור HTML עם נתונים</strong> - קובץ מלא עם המידע שלך</li>
+                        <li><strong>יצא נתונים</strong> - קובץ JSON לגיבוי</li>
+                        <li><strong>יבא נתונים</strong> - טען נתונים מקובץ JSON</li>
+                        <li><strong>Ctrl+E</strong> - ייצוא מהיר</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>💡 טיפ:</strong> כל השדות עריכים! לחץ על תא כלשהו כדי לערוך או להוסיף מידע<br>
+            <strong>💾 שמירה:</strong> הנתונים נשמרים אוטומטית כל 30 שניות + יש אפשרות לשמור HTML עם הנתונים שלך!
+        </div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffeaa7;">
+            <h4 style="color: #856404; margin-top: 0;">🔐 אפשרויות גיבוי ושמירה:</h4>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button class="btn" style="background: #6c757d; font-size: 14px; padding: 8px 15px;" onclick="createBackup()">💾 צור גיבוי</button>
+                <button class="btn" style="background: #17a2b8; font-size: 14px; padding: 8px 15px;" onclick="restoreBackup()">🔄 שחזר גיבוי</button>
+                <button class="btn" style="background: #28a745; font-size: 14px; padding: 8px 15px;" onclick="autoSave()">💫 שמור עכשיו</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-success" onclick="saveAsCSV()">💾 שמור כקובץ CSV</button>
+            <button class="btn btn-primary" onclick="copyToGoogleSheets()">📋 העתק לגוגל שיטס</button>
+            <button class="btn" style="background: #9C27B0;" onclick="saveHTMLWithData()">💾 שמור HTML עם נתונים</button>
+            <button class="btn" style="background: #FF5722;" onclick="exportData()">📤 יצא נתונים</button>
+            <button class="btn" style="background: #795548;" onclick="importData()">📥 יבא נתונים</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+            <button class="btn btn-warning" onclick="clearAllEdits()">🗑️ נקה עריכות</button>
+            <button class="btn" onclick="addNewProperty()">➕ הוסף נכס חדש</button>
+        </div>
+        
+        <div id="success" class="success">
+            ✅ הפעולה בוצעה בהצלחה!
+        </div>
+        
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>שם הנכס</th>
+                        <th>כתובת מלאה</th>
+                        <th>עיר</th>
+                        <th>מחיר (₪)</th>
+                        <th>חדרים</th>
+                        <th>שירותים</th>
+                        <th>מ"ר</th>
+                        <th>קומה</th>
+                        <th>מתוך קומות</th>
+                        <th>חניה</th>
+                        <th>מרפסת</th>
+                        <th>מעלית</th>
+                        <th>איש קשר</th>
+                        <th>טלפון</th>
+                        <th>אימייל</th>
+                        <th>סטטוס</th>
+                        <th>סיור וירטואלי</th>
+                        <th>תמונות/סרטונים</th>
+                        <th>תיאור הנכס</th>
+                        <th>הערות נוספות</th>
+                        <th>עמלה %</th>
+                        <th>תאריך כניסה</th>
+                        <th>תאריך עדכון</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td>1</td>
+                        <td class="property-name">דקל 9</td>
+                        <td contenteditable="true" class="editable">דקל 9</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell"></td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1KjpxcTZmkf5ExSs6uvsa3lqgtRtzrwJ8?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td class="property-name">המלך יוהכין 15</td>
+                        <td contenteditable="true" class="editable">המלך יוהכין 15</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell"></td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1VfsH6PFxzKN_-CpA6mG9sCffrCmyVrqZ?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td class="property-name">רחוב הכלנית</td>
+                        <td contenteditable="true" class="editable">רחוב הכלנית</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell">https://my.matterport.com/show/?m=QxFKpAVW8HG</td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1OdWL8UJXCmFXePwaIlMU4j8fUCm-M_3b?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td class="property-name">דב גור 30</td>
+                        <td contenteditable="true" class="editable">דב גור 30</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell">https://my.matterport.com/show/?m=7i19XsQkPJn</td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1DkosEfCSaZzXDe5rf4ioskIAfsAafS-F?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td class="property-name">התקווה 10</td>
+                        <td contenteditable="true" class="editable">התקווה 10</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell"></td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1vNfYsd9VuqwGOTEDomm1fStUqvkrlVIY?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td class="property-name">דוד רזיאל 22</td>
+                        <td contenteditable="true" class="editable">דוד רזיאל 22</td>
+                        <td contenteditable="true" class="editable">רמת אשכול אשקלון</td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell">https://my.matterport.com/show/?m=cbrhMsGKWCq</td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1ZjZ2T0Jc61ffdV7iHZDReHW7TtsPG4zX?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td class="property-name">ברנע בן אליעזר 105</td>
+                        <td contenteditable="true" class="editable">ברנע בן אליעזר 105</td>
+                        <td contenteditable="true" class="editable">אשקלון</td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell"></td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/15yu9TAyoCFqu5ie6atS-OVGSbzJriZtl?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td class="property-name">מלך חזקיה 8/3</td>
+                        <td contenteditable="true" class="editable">מלך חזקיה 8/3</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable price-cell"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable contact-cell"></td>
+                        <td contenteditable="true" class="editable">זמין</td>
+                        <td class="link-cell">https://my.matterport.com/show/?m=xcFfP9DVQ1i</td>
+                        <td class="link-cell">https://drive.google.com/drive/folders/1jEzD_GPW5imF-CCh30Hvcl577Oz6gfer?usp=share_link</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td contenteditable="true" class="editable">2.5</td>
+                        <td contenteditable="true" class="editable"></td>
+                        <td>17/08/2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h4 style="color: #495057; margin-top: 0;">📊 אפשרויות שמירה ויצוא</h4>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-success" onclick="saveAsCSV()">💾 CSV</button>
+                    <button class="btn btn-primary" onclick="copyToGoogleSheets()">📋 Google Sheets</button>
+                    <button class="btn" style="background: #9C27B0;" onclick="saveHTMLWithData()">💾 HTML עם נתונים</button>
+                    <button class="btn" style="background: #FF5722;" onclick="exportData()">📤 יצא JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let propertyCounter = 9;
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function saveAsCSV() {
+            const table = document.getElementById('dataTable');
+            const rows = table.querySelectorAll('tr');
+            let csv = [];
+            
+            csv.push('\ufeff');
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => {
+                    let text = col.textContent.trim();
+                    text = text.replace(/"/g, '""');
+                    rowData.push('"' + text + '"');
+                });
+                csv.push(rowData.join(','));
+            });
+
+            const csvFile = new Blob([csv.join('\n')], { 
+                type: 'text/csv;charset=utf-8;' 
+            });
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.download = 'נכסי_ריהאוס_2025_עריך.csv';
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            showSuccess('קובץ CSV נשמר בהצלחה!');
+        }
+
+        function copyToGoogleSheets() {
+            const table = document.getElementById('dataTable');
+            const rows = table.querySelectorAll('tr');
+            let data = [];
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach(col => {
+                    rowData.push(col.textContent.trim());
+                });
+                data.push(rowData.join('\t'));
+            });
+
+            const textData = data.join('\n');
+            
+            navigator.clipboard.writeText(textData).then(() => {
+                showSuccess('הנתונים הועתקו! פתח Google Sheets והדבק (Ctrl+V)');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = textData;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('הנתונים הועתקו! פתח Google Sheets והדבק (Ctrl+V)');
+            });
+        }
+
+        function saveHTMLWithData() {
+            const htmlContent = document.documentElement.outerHTML;
+            const htmlBlob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `נכסי_ריהאוס_2025_${new Date().toLocaleDateString('he-IL').replace(/\//g, '-')}.html`;
+            downloadLink.href = window.URL.createObjectURL(htmlBlob);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            showSuccess('קובץ HTML נשמר עם כל הנתונים!');
+        }
+
+        function exportData() {
+            const table = document.getElementById('dataTable');
+            const rows = table.querySelectorAll('tbody tr');
+            const data = [];
+
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const rowData = {
+                    id: index + 1,
+                    propertyName: cells[1]?.textContent?.trim() || '',
+                    fullAddress: cells[2]?.textContent?.trim() || '',
+                    city: cells[3]?.textContent?.trim() || '',
+                    price: cells[4]?.textContent?.trim() || '',
+                    rooms: cells[5]?.textContent?.trim() || '',
+                    bathrooms: cells[6]?.textContent?.trim() || '',
+                    sqm: cells[7]?.textContent?.trim() || '',
+                    floor: cells[8]?.textContent?.trim() || '',
+                    totalFloors: cells[9]?.textContent?.trim() || '',
+                    parking: cells[10]?.textContent?.trim() || '',
+                    balcony: cells[11]?.textContent?.trim() || '',
+                    elevator: cells[12]?.textContent?.trim() || '',
+                    contactName: cells[13]?.textContent?.trim() || '',
+                    phone: cells[14]?.textContent?.trim() || '',
+                    email: cells[15]?.textContent?.trim() || '',
+                    status: cells[16]?.textContent?.trim() || '',
+                    virtualTour: cells[17]?.textContent?.trim() || '',
+                    photos: cells[18]?.textContent?.trim() || '',
+                    description: cells[19]?.textContent?.trim() || '',
+                    notes: cells[20]?.textContent?.trim() || '',
+                    commission: cells[21]?.textContent?.trim() || '',
+                    entryDate: cells[22]?.textContent?.trim() || '',
+                    updateDate: cells[23]?.textContent?.trim() || ''
+                };
+                data.push(rowData);
+            });
+
+            const jsonData = {
+                exportDate: new Date().toISOString(),
+                totalProperties: data.length,
+                properties: data
+            };
+
+            const jsonBlob = new Blob([JSON.stringify(jsonData, null, 2)], { 
+                type: 'application/json;charset=utf-8' 
+            });
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `נתוני_נכסים_${new Date().toLocaleDateString('he-IL').replace(/\//g, '-')}.json`;
+            downloadLink.href = window.URL.createObjectURL(jsonBlob);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            showSuccess('נתונים יוצאו בהצלחה כקובץ JSON!');
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    
+                    if (!jsonData.properties || !Array.isArray(jsonData.properties)) {
+                        alert('קובץ JSON לא תקין!');
+                        return;
+                    }
+
+                    const tableBody = document.getElementById('tableBody');
+                    tableBody.innerHTML = '';
+
+                    jsonData.properties.forEach((property, index) => {
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td class="property-name">${property.propertyName || ''}</td>
+                            <td contenteditable="true" class="editable">${property.fullAddress || ''}</td>
+                            <td contenteditable="true" class="editable">${property.city || ''}</td>
+                            <td contenteditable="true" class="editable price-cell">${property.price || ''}</td>
+                            <td contenteditable="true" class="editable">${property.rooms || ''}</td>
+                            <td contenteditable="true" class="editable">${property.bathrooms || ''}</td>
+                            <td contenteditable="true" class="editable">${property.sqm || ''}</td>
+                            <td contenteditable="true" class="editable">${property.floor || ''}</td>
+                            <td contenteditable="true" class="editable">${property.totalFloors || ''}</td>
+                            <td contenteditable="true" class="editable">${property.parking || ''}</td>
+                            <td contenteditable="true" class="editable">${property.balcony || ''}</td>
+                            <td contenteditable="true" class="editable">${property.elevator || ''}</td>
+                            <td contenteditable="true" class="editable contact-cell">${property.contactName || ''}</td>
+                            <td contenteditable="true" class="editable contact-cell">${property.phone || ''}</td>
+                            <td contenteditable="true" class="editable contact-cell">${property.email || ''}</td>
+                            <td contenteditable="true" class="editable">${property.status || 'זמין'}</td>
+                            <td class="link-cell">${property.virtualTour || ''}</td>
+                            <td class="link-cell">${property.photos || ''}</td>
+                            <td contenteditable="true" class="editable">${property.description || ''}</td>
+                            <td contenteditable="true" class="editable">${property.notes || ''}</td>
+                            <td contenteditable="true" class="editable">${property.commission || '2.5'}</td>
+                            <td contenteditable="true" class="editable">${property.entryDate || ''}</td>
+                            <td>${property.updateDate || new Date().toLocaleDateString('he-IL')}</td>
+                        `;
+                        tableBody.appendChild(newRow);
+                    });
+
+                    propertyCounter = jsonData.properties.length + 1;
+                    showSuccess(`יובאו ${jsonData.properties.length} נכסים בהצלחה!`);
+                    
+                } catch (error) {
+                    alert('שגיאה בקריאת הקובץ: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function clearAllEdits() {
+            if (confirm('האם אתה בטוח שברצונך לנקות את כל העריכות?')) {
+                const editables = document.querySelectorAll('.editable');
+                editables.forEach(cell => {
+                    if (!cell.classList.contains('property-name') && 
+                        !cell.classList.contains('link-cell')) {
+                        cell.textContent = '';
+                    }
+                });
+                showSuccess('כל העריכות נוקו!');
+            }
+        }
+
+        function addNewProperty() {
+            const tableBody = document.getElementById('tableBody');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td>${propertyCounter}</td>
+                <td class="property-name" contenteditable="true">נכס חדש ${propertyCounter}</td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable price-cell"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable contact-cell"></td>
+                <td contenteditable="true" class="editable contact-cell"></td>
+                <td contenteditable="true" class="editable contact-cell"></td>
+                <td contenteditable="true" class="editable">זמין</td>
+                <td contenteditable="true" class="editable link-cell"></td>
+                <td contenteditable="true" class="editable link-cell"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable"></td>
+                <td contenteditable="true" class="editable">2.5</td>
+                <td contenteditable="true" class="editable"></td>
+                <td>${new Date().toLocaleDateString('he-IL')}</td>
+            `;
+            
+            tableBody.appendChild(newRow);
+            propertyCounter++;
+            showSuccess('נכס חדש נוסף בהצלחה!');
+        }
+
+        function createBackup() {
+            const backupData = getAllTableData();
+            localStorage.setItem('realEstateBackup', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                data: backupData
+            }));
+            showSuccess('גיבוי נשמר במחשב!');
+        }
+
+        function restoreBackup() {
+            const backup = localStorage.getItem('realEstateBackup');
+            if (!backup) {
+                alert('לא נמצא גיבוי שמור!');
+                return;
+            }
+
+            if (confirm('האם אתה בטוח שברצונך לשחזר מהגיבוי? הנתונים הנוכחיים יימחקו.')) {
+                try {
+                    const backupData = JSON.parse(backup);
+                    loadDataToTable(backupData.data);
+                    showSuccess('גיבוי שוחזר בהצלחה!');
+                } catch (error) {
+                    alert('שגיאה בשחזור הגיבוי: ' + error.message);
+                }
+            }
+        }
+
+        function getAllTableData() {
+            const table = document.getElementById('dataTable');
+            const rows = table.querySelectorAll('tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const cellData = [];
+                cells.forEach(cell => {
+                    cellData.push(cell.textContent.trim());
+                });
+                data.push(cellData);
+            });
+
+            return data;
+        }
+
+        function loadDataToTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            data.forEach((rowData, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${rowData[0] || index + 1}</td>
+                    <td class="property-name">${rowData[1] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[2] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[3] || ''}</td>
+                    <td contenteditable="true" class="editable price-cell">${rowData[4] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[5] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[6] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[7] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[8] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[9] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[10] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[11] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[12] || ''}</td>
+                    <td contenteditable="true" class="editable contact-cell">${rowData[13] || ''}</td>
+                    <td contenteditable="true" class="editable contact-cell">${rowData[14] || ''}</td>
+                    <td contenteditable="true" class="editable contact-cell">${rowData[15] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[16] || 'זמין'}</td>
+                    <td class="link-cell">${rowData[17] || ''}</td>
+                    <td class="link-cell">${rowData[18] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[19] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[20] || ''}</td>
+                    <td contenteditable="true" class="editable">${rowData[21] || '2.5'}</td>
+                    <td contenteditable="true" class="editable">${rowData[22] || ''}</td>
+                    <td>${rowData[23] || new Date().toLocaleDateString('he-IL')}</td>
+                `;
+                tableBody.appendChild(newRow);
+            });
+        }
+
+        function autoSave() {
+            const table = document.getElementById('dataTable');
+            const data = {};
+            const editables = table.querySelectorAll('.editable');
+            
+            editables.forEach((cell, index) => {
+                data[index] = cell.textContent;
+            });
+            
+            localStorage.setItem('realEstateAutoSave', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                data: data
+            }));
+            
+            showSuccess('נתונים נשמרו אוטומטית!');
+        }
+
+        function loadAutoSave() {
+            const savedData = localStorage.getItem('realEstateAutoSave');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    const data = parsed.data;
+                    const editables = document.querySelectorAll('.editable');
+                    
+                    editables.forEach((cell, index) => {
+                        if (data[index] !== undefined && data[index] !== '') {
+                            cell.textContent = data[index];
+                        }
+                    });
+                    
+                    console.log('נתונים שוחזרו מהשמירה האוטומטית');
+                } catch (e) {
+                    console.log('Failed to load auto-save data');
+                }
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAutoSave();
+            
+            const savedData = localStorage.getItem('realEstateAutoSave');
+            if (savedData) {
+                showSuccess('נתונים שמורים שוחזרו אוטומטית!');
+            }
+        });
+        
+        setInterval(autoSave, 30000);
+        
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('editable')) {
+                clearTimeout(window.autoSaveTimeout);
+                window.autoSaveTimeout = setTimeout(autoSave, 2000);
+            }
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            autoSave();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                autoSave();
+            }
+            
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                exportData();
+            }
+        });
+    </script>
+</body>
+</html>
